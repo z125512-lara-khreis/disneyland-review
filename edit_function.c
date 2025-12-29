@@ -17,11 +17,9 @@ struct Review {
     char branch[50];            // Disneyland branch
 };
 
-/* =========================
-   Global variables
-========================= */
+
 struct Review reviews[MAX];     // array collect all review 
-int count = 0;                  // amount of review 
+int count = 0;                  // collect the amount of review 
 
 //function loadcsv
 void loadCSV()
@@ -39,7 +37,7 @@ void loadCSV()
 
         buffer[0] = '\0';
 
-        /* if review have " maybe it have many line */
+        /* if it have " it have many line because it the review sentence */
         if (strchr(line, '"')) {
             strcat(buffer, line);
 
@@ -98,9 +96,9 @@ int findByID(int id)
 {
     for (int i = 0; i < count; i++) {
         if (reviews[i].id == id)
-            return i;   // เจอ → ส่ง index กลับ
+            return i;   // find → send index back
     }
-    return -1;          // ไม่เจอ
+    return -1;          // can't find
 }
 
 // function editReview
@@ -134,7 +132,7 @@ void editMenu()
 {
     loadCSV();   // use function loadcsv
 
-    //Giving user Enter review id
+    //Giving user to Enter review id
     int id;
     printf("Enter review ID: ");
     scanf("%d", &id);
@@ -154,7 +152,7 @@ void editMenu()
     printf("Branch: %s\n", reviews[index].branch);
 
     char confirm;
-    printf("\nEdit this review? (y/n): ");
+    printf("\nDo you want to edit this review? (y/n): ");
     scanf(" %c", &confirm);
 
     if (confirm == 'y' || confirm == 'Y') {

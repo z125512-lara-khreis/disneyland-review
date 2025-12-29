@@ -6,7 +6,7 @@
 #define REVIEW_LEN 4000
 
 /* =========================
-   Struct for collect Review
+Struct for collect Review
 ========================= */
 struct Review {
     int id;                     // Review ID

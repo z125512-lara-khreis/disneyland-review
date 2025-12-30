@@ -17,9 +17,7 @@ struct Review {
     char branch[50];            // Disneyland branch
 };
 
-/* =========================
-   Global variables
-========================= */
+
 struct Review reviews[MAX];     // array collect all review 
 int count = 0;                  // amount of review 
 
@@ -98,9 +96,9 @@ int findByID(int id)
 {
     for (int i = 0; i < count; i++) {
         if (reviews[i].id == id)
-            return i;   // เจอ → ส่ง index กลับ
+            return i;   // find → send index กลับ
     }
-    return -1;          // ไม่เจอ
+    return -1;          // can not find
 }
 
 // function editReview
@@ -136,7 +134,7 @@ void editMenu()
 
     //Giving user Enter review id
     int id;
-    printf("Enter review ID: ");
+    printf("Enter Review ID: ");
     scanf("%d", &id);
 
     int index = findByID(id);

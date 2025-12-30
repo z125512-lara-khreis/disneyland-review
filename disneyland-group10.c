@@ -107,6 +107,57 @@ void add_review_append_only(const char *filename)
     printf("Thank you! We have successfully received your review.\n");
 }
 
+void delete_review(const char *filename)
+{
+    FILE *original = fopen(filename, "r");
+    FILE *temp = fopen("temp.csv", "w");
+
+    char line[2000];
+    int delete_id;
+    int current_id;
+    int found = 0;
+
+    if (original == NULL || temp == NULL)
+    {
+        printf("Error: File not found.\n");
+        return;
+    }
+
+    printf("Enter the Review_ID to delete: ");
+    scanf("%d", &delete_id);
+
+    /* copy header line */
+    if (fgets(line, sizeof(line), original) != NULL)
+    {
+        fprintf(temp, "%s", line);
+    }
+
+    /* read each review line */
+    while (fgets(line, sizeof(line), original) != NULL)
+    {
+        if (sscanf(line, "%d,", &current_id) == 1)
+        {
+            if (current_id == delete_id)
+            {
+                found = 1;
+                continue;   // skip this line (delete)
+            }
+        }
+        fprintf(temp, "%s", line);
+    }
+
+    fclose(original);
+    fclose(temp);
+
+    remove(filename);
+    rename("temp.csv", filename);
+
+    if (found)
+        printf("Review deleted successfully.\n");
+    else
+        printf("Review_ID not found.\n");
+}
+
 /*Runs the programm*/
 int main(void)
 {

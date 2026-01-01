@@ -161,7 +161,9 @@ void delete_review(const char *filename)
 /*Runs the programm*/
 int main(void)
 {
-    get_next_id("disneylandreview.csv");
-    add_review_append_only("disneylandreview.csv");
+    /*get_next_id("disneylandreview.csv");
+    add_review_append_only("disneylandreview.csv");*/
+
+    delete_review("disneylandreview.csv");
     return 0;
 }

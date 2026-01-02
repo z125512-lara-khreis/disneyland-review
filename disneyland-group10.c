@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+//---Delete Options---//
 /*Writes one text field into the CSV. It puts the text in quotes. It doubles any " inside the text. */
 void write_csv_field(FILE *dl, char text[])
 {
@@ -157,6 +159,11 @@ void delete_review(const char *filename)
     else
         printf("Review_ID not found.\n");
 }
+//---Delete Options---//
+
+// --- Edit Options ---//
+
+// --- Edit Options ---//
 
 /*Runs the programm*/
 int main(void)
@@ -186,10 +193,38 @@ int main(void)
     printf("Option: ");
     scanf("%d", &choice);
 
+        switch (choice)
+    {
+    case 1:
+        /* displayReviews(); */
+        break;
+
+    case 2:
+        /* addReview(); */
+        break;
+
+    case 3:
+        delete_review("disneylandreview.csv"); //Call Delete function
+        break;
+
+    case 4:
+        editMenu(); // Call Edit function
+        break;
+
+    case 5:
+        printf("Exit!\n");
+        return 0;
+
+    default:
+        printf("Invalid option\n");
+    }
+
+    return 0;
+
     /*get_next_id("disneylandreview.csv");
     add_review_append_only("disneylandreview.csv");*/
 
-    delete_review("disneylandreview.csv");
+    // delete_review("disneylandreview.csv");
 
     return 0;
 }

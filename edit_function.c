@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX 100
-#define LINE 1024
+#define MAX 100 //define max value of review
+#define LINE 1024 
 #define REVIEW_LEN 4000
 
 /* =========================
@@ -21,6 +21,24 @@ struct Review {
 struct Review reviews[MAX];     // array collect all review 
 int count = 0;                  // collect the amount of review 
 
+//function check int of id and rating
+int inputInt(const char *message)
+{
+    char line[100]; 
+    int value; 
+
+    while (1) {
+        printf("%s", message);
+        //if it not int it will be continue in the while loop
+        if (!fgets(line, sizeof(line), stdin))
+            continue;
+        //condition if it "int" it will return the value
+        if (sscanf(line, "%d", &value) == 1)
+            return value;
+
+        printf("Please enter numbers only.\n");
+    }
+}
 //function loadcsv
 void loadCSV()
 {
@@ -37,7 +55,7 @@ void loadCSV()
 
         buffer[0] = '\0';
 
-        /* if it have " it have many line because it the review sentence */
+        /* if it still don't have " it have many line because it the review sentence */
         if (strchr(line, '"')) {
             strcat(buffer, line);
 
@@ -106,8 +124,8 @@ void editReview(int index)
 {
     printf("\n--- Edit Review ---\n");
 
-    printf("Enter the Rating: ");
-    scanf("%d", &reviews[index].rating);
+    //use function inputint
+    reviews[index].rating = inputInt("Enter the Rating: ");
 
     printf("Enter the Month: ");
     scanf(" %19[^\n]", reviews[index].month);
@@ -133,11 +151,10 @@ void editMenu()
     loadCSV();   // use function loadcsv
 
     //Giving user to Enter review id
-    int id;
-    printf("Enter review ID: ");
-    scanf("%d", &id);
-
+    // use function inputint
+    int id = inputInt("Enter review ID: ");
     int index = findByID(id);
+
     if (index == -1) {
         printf("Review ID not found\n");
         return;

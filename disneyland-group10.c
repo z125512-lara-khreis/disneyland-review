@@ -5,7 +5,7 @@ int view_data(const char *file)
     FILE *fp;
     char ch;
 
-    fp = fopen("disneylandreview.csv", "r");
+    fp = fopen(file, "r");
     if (fp == NULL)
     {
         printf("Can't open file!\n");

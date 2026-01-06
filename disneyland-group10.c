@@ -24,7 +24,7 @@ int view_data(const char *file)
 
 int main(void)
 {
-    view_data("disneyland.csv");
+    view_data("disneylandreview.csv");
 
     return 0;
 }

@@ -70,7 +70,7 @@ void add_review_append_only(const char *filename)
     scanf("%d", &rating);
     getchar();
 
-    printf("Review_Month (z.B. April): ");
+    printf("Review_Month (e.g. April): ");
     scanf(" %99[^\n]", month);
     getchar();
 

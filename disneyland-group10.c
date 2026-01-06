@@ -97,7 +97,7 @@ void add_review_append_only(const char *filename)
 
     if (!existed)
     {
-        fprintf(dl, "Review_ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n");
+        fprintf(dl, "Review ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n");
     }
 
     fprintf(dl, "%d,%d,", next_id, rating);
@@ -134,7 +134,7 @@ void delete_review(const char *filename)
         return;
     }
 
-    printf("Enter the Review_ID to delete: ");
+    printf("Enter the Review ID to delete: ");
     scanf("%d", &delete_id);
 
     /* copy header line */
@@ -166,7 +166,7 @@ void delete_review(const char *filename)
     if (found)
         printf("Review deleted successfully.\n");
     else
-        printf("Review_ID not found.\n");
+        printf("Review ID not found.\n");
 }
 //---Delete Options---//
 

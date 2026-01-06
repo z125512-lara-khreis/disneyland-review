@@ -349,10 +349,15 @@ void editMenu()
     printf("\nDo you want to edit this review? (y/n): ");
     scanf(" %c", &confirm);
 
+    //clear buffer
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+
     if (confirm == 'y' || confirm == 'Y')
     {
         editReview(index);
     }
+    return;
 }
 
 // --- Edit Options ---//
@@ -362,62 +367,63 @@ int main(void)
 {
 
     int choice;
-
-    printf("****** Welcome to our Disneyland Reviewing System! ******\n\n");
-    printf("Please choose one option to continue by entering a number:\n\n");
-
-    char *options[] = {"1 Display Reviews", "2 Add Review", "3 Delete Review", "4 Edit Review", "5 Exit"};
-    int numberOfStrings = sizeof(options) / sizeof(options[0]);
-
-    for (int i = 0; i < numberOfStrings; i++)
+    while (1)
     {
-        printf("%s", options[i]);
+        printf("****** Welcome to our Disneyland Reviewing System! ******\n\n");
+        printf("Please choose one option to continue by entering a number:\n\n");
 
-        if (i == numberOfStrings - 1) // If last element of array...
+        char *options[] = {"1 Display Reviews", "2 Add Review", "3 Delete Review", "4 Edit Review", "5 Exit"};
+        int numberOfStrings = sizeof(options) / sizeof(options[0]);
+
+        for (int i = 0; i < numberOfStrings; i++)
         {
-            printf("\n\n"); // ... add two escape sequences
+            printf("%s", options[i]);
+
+            if (i == numberOfStrings - 1) // If last element of array...
+            {
+                printf("\n\n"); // ... add two escape sequences
+            }
+            else
+            {
+                printf("\n");
+            }
         }
-        else
+
+        printf("Option: ");
+        scanf("%d", &choice);
+
+        // clear buffer
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        switch (choice)
         {
-            printf("\n");
+        case 1:
+            /* displayReviews(); */
+            break;
+
+        case 2:
+            add_review_append_only("disneylandreview.csv"); // Call Add function
+            break;
+
+        case 3:
+            delete_review("disneylandreview.csv"); // Call Delete function
+            break;
+
+        case 4:
+            editMenu(); // Call Edit function
+            break;
+
+        case 5:
+            printf("Exit!\n");
+            return 0;
+
+        default:
+            printf("Invalid option\n");
         }
+        /*get_next_id("disneylandreview.csv");
+        add_review_append_only("disneylandreview.csv");*/
+
+        // delete_review("disneylandreview.csv");
     }
-
-    printf("Option: ");
-    scanf("%d", &choice);
-
-    switch (choice)
-    {
-    case 1:
-        /* displayReviews(); */
-        break;
-
-    case 2:
-        add_review_append_only("disneylandreview.csv"); //Call Add function
-        break;
-
-    case 3:
-        delete_review("disneylandreview.csv"); // Call Delete function
-        break;
-
-    case 4:
-        editMenu(); // Call Edit function
-        break;
-
-    case 5:
-        printf("Exit!\n");
-        return 0;
-
-    default:
-        printf("Invalid option\n");
-    }
-
-    return 0;
-
-    /*get_next_id("disneylandreview.csv");
-    add_review_append_only("disneylandreview.csv");*/
-
-    // delete_review("disneylandreview.csv");
-
-    return 0;
 }

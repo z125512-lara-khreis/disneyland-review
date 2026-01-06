@@ -86,6 +86,8 @@ void add_review_append_only(const char *filename)
     scanf(" %199[^\n]", branch);
     getchar();
 
+    printf("\n");
+
     FILE *dl = fopen(filename, "a");
     if (dl == NULL)
     {

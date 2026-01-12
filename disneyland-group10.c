@@ -61,22 +61,51 @@ void add_review_append_only(const char *filename)
     int next_id = get_next_id(filename);
 
     int rating;
+    int i;
     char month[100];
     char location[200];
     char review_text[2000];
     char branch[200];
 
     printf("Rating (1-5): ");
-    scanf("%d", &rating);
+    if (scanf("%d", &rating) != 1)
+    {
+        printf("Error: Rating must be a number.\n");
+        return;
+    }
     getchar();
+
+    if (rating < 1 || rating > 5)
+    {
+        printf("Error: Rating must be between 1 and 5.\n");
+        return;
+    }
 
     printf("Review_Month (e.g. April): ");
     scanf(" %99[^\n]", month);
     getchar();
 
+    for (i = 0; month[i] != '\0'; i++)
+    {
+        if (month[i] >= '0' && month[i] <= '9')
+        {
+            printf("Error: Review_Month must not contain numbers.\n");
+            return;
+        }
+    }
+
     printf("Reviewer_Location: ");
     scanf(" %199[^\n]", location);
     getchar();
+
+    for (i = 0; location[i] != '\0'; i++)
+    {
+        if (location[i] >= '0' && location[i] <= '9')
+        {
+            printf("Error: Reviewer_Location must not contain numbers.\n");
+            return;
+        }
+    }
 
     printf("Review_Text: ");
     scanf(" %1999[^\n]", review_text);
@@ -85,6 +114,15 @@ void add_review_append_only(const char *filename)
     printf("Branch (e.g. Disneyland_Paris): ");
     scanf(" %199[^\n]", branch);
     getchar();
+
+    for (i = 0; branch[i] != '\0'; i++)
+    {
+        if (branch[i] >= '0' && branch[i] <= '9')
+        {
+            printf("Error: Branch must not contain numbers.\n");
+            return;
+        }
+    }
 
     printf("\n");
 
@@ -97,19 +135,15 @@ void add_review_append_only(const char *filename)
 
     if (!existed)
     {
-        fprintf(dl, "Review ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n");
+        fprintf(dl, "Review_ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n");
     }
 
     fprintf(dl, "%d,%d,", next_id, rating);
 
-    write_csv_field(dl, month);
-    fputc(',', dl);
-    write_csv_field(dl, location);
-    fputc(',', dl);
-    write_csv_field(dl, review_text);
-    fputc(',', dl);
-    write_csv_field(dl, branch);
-    fputc('\n', dl);
+    write_csv_field(dl, month);       fputc(',', dl);
+    write_csv_field(dl, location);    fputc(',', dl);
+    write_csv_field(dl, review_text); fputc(',', dl);
+    write_csv_field(dl, branch);      fputc('\n', dl);
 
     fclose(dl);
 

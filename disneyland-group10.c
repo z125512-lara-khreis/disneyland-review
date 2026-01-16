@@ -242,6 +242,49 @@ void print_table()
     }
 }
 
+// function only 12 month
+void inputMonth(char *result, int maxLen)
+{
+    const char *months[] = {
+        "January", "February", "March", "April",
+        "May", "June", "July", "August",
+        "September", "October", "November", "December"
+    };
+
+    char input[50];
+    int valid;
+
+    while (1)
+    {
+        printf("Enter Review Month (e.g. April): ");
+
+        if (!fgets(input, sizeof(input), stdin))
+            continue;
+
+        // delete newline
+        input[strcspn(input, "\n")] = '\0';
+
+        valid = 0;
+        for (int i = 0; i < 12; i++)
+        {
+            if (strcmp(input, months[i]) == 0)
+            {
+                valid = 1;
+                break;
+            }
+        }
+
+        if (valid)
+        {
+            strncpy(result, input, maxLen - 1);
+            result[maxLen - 1] = '\0';
+            return;
+        }
+
+        printf("Invalid month. Please enter a valid month name.\n");
+    }
+}
+
 //***************************** Add Data *****************************
 
 /*Writes one text field into the CSV. It puts the text in quotes. It doubles any " inside the text. */
@@ -322,8 +365,8 @@ void add_review_append_only(const char *filename)
     }
 
     printf("Review_Month (e.g. April): ");
-    scanf(" %99[^\n]", month);
-    getchar();
+    inputMonth(month, sizeof(month));
+    // getchar();
 
     for (i = 0; month[i] != '\0'; i++)
     {
@@ -534,6 +577,34 @@ void loadCSV()
     fclose(fp);
 }
 
+int inputRating(const char *message)
+{
+    char line[100];
+    int value;
+
+    while (1)
+    {
+        printf("%s", message);
+
+        if (!fgets(line, sizeof(line), stdin))
+            continue;
+
+        if (sscanf(line, "%d", &value) != 1)
+        {
+            printf("Please enter numbers only.\n");
+            continue;
+        }
+
+        if (value < 1 || value > 5)
+        {
+            printf("Rating must be between 1 and 5.\n");
+            continue;
+        }
+
+        return value;
+    }
+}
+
 // save function
 void saveCSV()
 {
@@ -575,10 +646,10 @@ void editReview(int index)
     printf("\n--- Edit Review ---\n");
 
     // use function inputint
-    reviews[index].rating = inputInt("Enter the Rating: ");
+    reviews[index].rating = inputRating("Enter the Rating (1-5): ");
 
     printf("Enter the Month: ");
-    scanf(" %19[^\n]", reviews[index].month);
+    inputMonth(reviews[index].month, sizeof(reviews[index].month));
 
     printf("Enter the Location: ");
     scanf(" %49[^\n]", reviews[index].location);

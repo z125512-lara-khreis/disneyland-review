@@ -720,7 +720,7 @@ void delete_review(const char *filename)
     FILE *original = fopen(filename, "r");
     if (!original)
     {
-        printf("Error: cannot open %s\n", filename);
+        printf("File not found %s\n", filename);
         return;
     }
 
@@ -734,7 +734,7 @@ void delete_review(const char *filename)
     }
 
     int delete_id;
-    printf("Enter the Review_ID to delete: ");
+    printf("Enter the Review ID to delete: ");
     if (scanf("%d", &delete_id) != 1)
     {
         printf("Invalid Review_ID.\n");
@@ -1017,7 +1017,7 @@ void editMenu()
 
     // Giving user to Enter review id
     //  use function inputint
-    int id = inputInt("Enter Review ID: ");
+    int id = inputInt("Enter the Review ID: ");
     int index = findByID(id);
 
     if (index == -1)

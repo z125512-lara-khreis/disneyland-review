@@ -5,10 +5,10 @@
 //***************************** View Data *****************************
 
 /* Configuration */
-#define MAX_ROWS 100            // Maximum number of csv rows
-#define COLS 6                  // Fixed number of columns
-#define MAX_CELL 2048           // Maximum length of one cell
-#define MAX_REVIEW_WIDTH 52     // Maximum width of review text column
+#define MAX_ROWS 100        // Maximum number of csv rows
+#define COLS 6              // Fixed number of columns
+#define MAX_CELL 2048       // Maximum length of one cell
+#define MAX_REVIEW_WIDTH 52 // Maximum width of review text column
 
 char table[MAX_ROWS][COLS][MAX_CELL]; // Stores csv file in memory
 int rows = 0;
@@ -20,7 +20,6 @@ void column_width(void);
 void print_table(void);
 void print_separator(void);
 void print_cell_wrapped(const char *text, int width, int line);
-
 
 /* Word-wrapping for a single cell */
 void print_cell_wrapped(const char *text, int width, int line)
@@ -100,8 +99,7 @@ void column_width(void)
 {
     const char *header[COLS] = {
         "Review_ID", "Rating", "Review_Month",
-        "Reviewer_Location", "Review_Text", "Branch"
-    };
+        "Reviewer_Location", "Review_Text", "Branch"};
 
     for (int c = 0; c < COLS; c++)
     {
@@ -179,8 +177,7 @@ void print_table()
 {
     const char *header[COLS] = {
         "Review_ID", "Rating", "Review_Month",
-        "Reviewer_Location", "Review_Text", "Branch"
-    };
+        "Reviewer_Location", "Review_Text", "Branch"};
 
     print_separator();
 
@@ -255,7 +252,6 @@ void swap_rows(int a, int b)
     }
 }
 
-
 /* Sorts review entries by rating in a descending order*/
 void sort_by_rating_desc()
 {
@@ -310,7 +306,6 @@ int sort_menu()
     {
         return 0;
     }
-    
 
     if (sscanf(input, "%d", &choice) != 1)
     {
@@ -336,15 +331,13 @@ int sort_menu()
     return 1;
 }
 
-
 // function only 12 month
 void inputMonth(char *result, int maxLen)
 {
     const char *months[] = {
         "January", "February", "March", "April",
         "May", "June", "July", "August",
-        "September", "October", "November", "December"
-    };
+        "September", "October", "November", "December"};
 
     char input[50];
     int valid;
@@ -514,12 +507,31 @@ void add_review_append_only(const char *filename)
         fprintf(dl, "Review_ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n");
     }
 
+    /* make sure the file ends with newline before appending */
+    FILE *check = fopen(filename, "r+");
+    if (check != NULL)
+    {
+        fseek(check, -1, SEEK_END);
+        int lastChar = fgetc(check);
+
+        if (lastChar != '\n')
+        {
+            fseek(check, 0, SEEK_END);
+            fputc('\n', check);
+        }
+        fclose(check);
+    }
+
     fprintf(dl, "%d,%d,", next_id, rating);
 
-    write_csv_field(dl, month);       fputc(',', dl);
-    write_csv_field(dl, location);    fputc(',', dl);
-    write_csv_field(dl, review_text); fputc(',', dl);
-    write_csv_field(dl, branch);      fputc('\n', dl);
+    write_csv_field(dl, month);
+    fputc(',', dl);
+    write_csv_field(dl, location);
+    fputc(',', dl);
+    write_csv_field(dl, review_text);
+    fputc(',', dl);
+    write_csv_field(dl, branch);
+    fputc('\n', dl);
 
     fclose(dl);
 
@@ -529,9 +541,10 @@ void add_review_append_only(const char *filename)
 //***************************** Delete Data *****************************
 
 /*Trim newline characters from input string*/
-static void trim_newline(char* s)
+static void trim_newline(char *s)
 {
-    if (!s) return;
+    if (!s)
+        return;
     size_t n = strlen(s);
     while (n > 0 && (s[n - 1] == '\n' || s[n - 1] == '\r'))
     {
@@ -541,26 +554,30 @@ static void trim_newline(char* s)
 }
 
 /*Ask user a yes/no question until valid input*/
-static char ask_yes_no(const char* prompt)
+static char ask_yes_no(const char *prompt)
 {
     char ans[32];
     while (1)
     {
         printf("%s", prompt);
-        if (!fgets(ans, sizeof(ans), stdin)) return 'n';
+        if (!fgets(ans, sizeof(ans), stdin))
+            return 'n';
         trim_newline(ans);
 
-        if (ans[0] == 'y' || ans[0] == 'Y') return 'y';
-        if (ans[0] == 'n' || ans[0] == 'N') return 'n';
+        if (ans[0] == 'y' || ans[0] == 'Y')
+            return 'y';
+        if (ans[0] == 'n' || ans[0] == 'N')
+            return 'n';
 
         printf("Please enter y or n.\n");
     }
 }
 
 /*Read ONE CSV record */
-static int read_csv_record(FILE* fp, char* out, size_t out_size)
+static int read_csv_record(FILE *fp, char *out, size_t out_size)
 {
-    if (!fp || !out || out_size == 0) return 0;
+    if (!fp || !out || out_size == 0)
+        return 0;
 
     out[0] = '\0';
     char line[2048];
@@ -570,7 +587,8 @@ static int read_csv_record(FILE* fp, char* out, size_t out_size)
     while (fgets(line, sizeof(line), fp))
     {
         size_t len = strlen(line);
-        if (used + len + 1 >= out_size) return 0;
+        if (used + len + 1 >= out_size)
+            return 0;
 
         memcpy(out + used, line, len + 1);
         used += len;
@@ -579,25 +597,29 @@ static int read_csv_record(FILE* fp, char* out, size_t out_size)
         {
             if (line[i] == '"')
             {
-                if (line[i + 1] == '"') i++;
-                else in_quotes = !in_quotes;
+                if (line[i + 1] == '"')
+                    i++;
+                else
+                    in_quotes = !in_quotes;
             }
         }
 
-        if (!in_quotes) return 1;
+        if (!in_quotes)
+            return 1;
     }
     return used > 0;
 }
 
 /*Parse CSV fields correctly*/
-static int parse_csv_fields(const char* rec, char fields[][2000], int max_fields)
+static int parse_csv_fields(const char *rec, char fields[][2000], int max_fields)
 {
     int f = 0, i = 0;
 
     while (rec[i] != '\0' && f < max_fields)
     {
         int out = 0;
-        while (rec[i] == ' ') i++;
+        while (rec[i] == ' ')
+            i++;
 
         if (rec[i] == '"')
         {
@@ -620,15 +642,18 @@ static int parse_csv_fields(const char* rec, char fields[][2000], int max_fields
                 }
             }
             fields[f][out] = '\0';
-            while (rec[i] && rec[i] != ',') i++;
-            if (rec[i] == ',') i++;
+            while (rec[i] && rec[i] != ',')
+                i++;
+            if (rec[i] == ',')
+                i++;
         }
         else
         {
             while (rec[i] && rec[i] != ',' && rec[i] != '\n')
                 fields[f][out++] = rec[i++];
             fields[f][out] = '\0';
-            if (rec[i] == ',') i++;
+            if (rec[i] == ',')
+                i++;
         }
         f++;
     }
@@ -636,12 +661,17 @@ static int parse_csv_fields(const char* rec, char fields[][2000], int max_fields
 }
 
 /*Create backup of original CSV file*/
-static int copy_file(const char* src, const char* dst)
+static int copy_file(const char *src, const char *dst)
 {
-    FILE* in = fopen(src, "rb");
-    if (!in) return 0;
-    FILE* out = fopen(dst, "wb");
-    if (!out) { fclose(in); return 0; }
+    FILE *in = fopen(src, "rb");
+    if (!in)
+        return 0;
+    FILE *out = fopen(dst, "wb");
+    if (!out)
+    {
+        fclose(in);
+        return 0;
+    }
 
     char buf[4096];
     size_t n;
@@ -654,9 +684,9 @@ static int copy_file(const char* src, const char* dst)
 }
 
 /*delete_review */
-void delete_review(const char* filename)
+void delete_review(const char *filename)
 {
-    FILE* original = fopen(filename, "r");
+    FILE *original = fopen(filename, "r");
     if (!original)
     {
         printf("Error: cannot open %s\n", filename);
@@ -665,7 +695,7 @@ void delete_review(const char* filename)
 
     copy_file(filename, "disneylandreview_backup.csv");
 
-    FILE* temp = fopen("temp_delete.csv", "w");
+    FILE *temp = fopen("temp_delete.csv", "w");
     if (!temp)
     {
         fclose(original);
@@ -678,30 +708,31 @@ void delete_review(const char* filename)
     {
         printf("Invalid Review_ID.\n");
         int ch;
-        while ((ch = getchar()) != '\n' && ch != EOF) {}
+        while ((ch = getchar()) != '\n' && ch != EOF)
+        {
+        }
         fclose(original);
         fclose(temp);
         remove("temp_delete.csv");
         return;
     }
-    getchar(); 
-
+    getchar();
 
     char rec[8000];
-   if (read_csv_record(original, rec, sizeof(rec)))
-   {
-       fputs(rec, temp);
-       if (rec[strlen(rec) - 1] != '\n') fputc('\n', temp);
-   }
-   else
-   {
-       printf("Error: CSV header missing.\n");
-       fclose(original);
-       fclose(temp);
-       remove("temp_delete.csv");
-       return;
-   }
-
+    if (read_csv_record(original, rec, sizeof(rec)))
+    {
+        fputs(rec, temp);
+        if (rec[strlen(rec) - 1] != '\n')
+            fputc('\n', temp);
+    }
+    else
+    {
+        printf("Error: CSV header missing.\n");
+        fclose(original);
+        fclose(temp);
+        remove("temp_delete.csv");
+        return;
+    }
 
     int found = 0;
 
@@ -831,7 +862,7 @@ void loadCSV()
         }
 
         sscanf(buffer,
-               "%d,%d,%19[^,],%49[^,],\"%3999[^\"]\",%49[^\n]",
+               "%d,%d,%19[^,],%49[^,],%3999[^,],%49[^\n]",
                &reviews[count].id,
                &reviews[count].rating,
                reviews[count].month,
@@ -916,7 +947,7 @@ void editReview(int index)
     // use function inputint
     reviews[index].rating = inputRating("Enter the Rating (1-5): ");
 
-    printf("Enter the month you have visited (e.g. April): ");
+    // printf("Enter the month you have visited (e.g. April): ");
     inputMonth(reviews[index].month, sizeof(reviews[index].month));
 
     printf("Enter your location: ");
@@ -937,6 +968,7 @@ void editReview(int index)
 // funtion show all process
 void editMenu()
 {
+    count = 0;
     loadCSV(); // use function loadcsv
 
     // Giving user to Enter review id
@@ -962,9 +994,10 @@ void editMenu()
     printf("\nDo you want to edit this review? (y/n): ");
     scanf(" %c", &confirm);
 
-    //clear buffer
+    // clear buffer
     int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
 
     if (confirm == 'y' || confirm == 'Y')
     {
@@ -1005,31 +1038,32 @@ int main(void)
 
         // clear buffer
         int c;
-        while ((c = getchar()) != '\n' && c != EOF);
+        while ((c = getchar()) != '\n' && c != EOF)
+            ;
 
         switch (choice)
         {
         case 1:
+        {
+            FILE *fp = fopen("disneylandreview.csv", "r");
+            if (!fp)
             {
-                FILE *fp = fopen("disneylandreview.csv", "r");
-                if (!fp)
-                {
-                    perror("File could not be opened");
-                    return 1;
-                }
-
-                view_data(fp); // Call View function
-                fclose(fp);
-
-                while (!sort_menu())
-                {
-                    printf("Try again.\n");
-                }
-
-                column_width();
-                print_table();
-                break;
+                perror("File could not be opened");
+                return 1;
             }
+
+            view_data(fp); // Call View function
+            fclose(fp);
+
+            while (!sort_menu())
+            {
+                printf("Try again.\n");
+            }
+
+            column_width();
+            print_table();
+            break;
+        }
         case 2:
             add_review_append_only("disneylandreview.csv"); // Call Add function
             break;

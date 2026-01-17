@@ -440,23 +440,32 @@ void add_review_append_only(const char *filename)
 
     int rating;
     int i;
+    int ch;
     char month[100];
     char location[200];
     char review_text[2000];
     char branch[200];
 
-    printf("Enter your rating (1-5): ");
-    if (scanf("%d", &rating) != 1)
+    while (1)
     {
-        printf("Rating must be a number!\n");
-        return;
-    }
-    getchar();
+        printf("Enter your rating (1-5): ");
 
-    if (rating < 1 || rating > 5)
-    {
-        printf("Rating must be between 1 and 5!\n");
-        return;
+        if (scanf("%d", &rating) != 1)
+        {
+            printf("Rating must be a number!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
+        }
+
+        while ((ch = getchar()) != '\n' && ch != EOF) { }
+
+        if (rating < 1 || rating > 5)
+        {
+            printf("Rating must be between 1 and 5!\n");
+            continue;
+        }
+
+        break;
     }
 
     inputMonth(month, sizeof(month));
@@ -470,34 +479,56 @@ void add_review_append_only(const char *filename)
         }
     }
 
-    printf("Enter your location: ");
-    scanf(" %199[^\n]", location);
-    getchar();
-
-    for (i = 0; location[i] != '\0'; i++)
+    while (1)
     {
-        if (location[i] >= '0' && location[i] <= '9')
+        printf("Enter your location: ");
+        if (scanf(" %199[^\n]", location) != 1)
         {
-            printf("Location must not contain numbers!\n");
-            return;
+            printf("Location input is invalid!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
         }
+        getchar();
+
+        for (i = 0; location[i] != '\0'; i++)
+        {
+            if (location[i] >= '0' && location[i] <= '9')
+            {
+                printf("Location must not contain numbers!\n");
+                break;
+            }
+        }
+
+        if (location[i] == '\0')
+            break;
     }
 
     printf("Enter your review: ");
     scanf(" %1999[^\n]", review_text);
     getchar();
 
-    printf("Enter the branch you have visited (e.g. Disneyland_Paris): ");
-    scanf(" %199[^\n]", branch);
-    getchar();
-
-    for (i = 0; branch[i] != '\0'; i++)
+    while (1)
     {
-        if (branch[i] >= '0' && branch[i] <= '9')
+        printf("Enter the branch you have visited (e.g. Disneyland_Paris): ");
+        if (scanf(" %199[^\n]", branch) != 1)
         {
-            printf("Branch must not contain numbers!\n");
-            return;
+            printf("Branch input is invalid!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
         }
+        getchar();
+
+        for (i = 0; branch[i] != '\0'; i++)
+        {
+            if (branch[i] >= '0' && branch[i] <= '9')
+            {
+                printf("Branch must not contain numbers!\n");
+                break;
+            }
+        }
+
+        if (branch[i] == '\0')
+            break;
     }
 
     printf("\n");

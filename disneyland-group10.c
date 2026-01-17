@@ -529,7 +529,7 @@ void add_review_append_only(const char *filename)
     FILE *dl = fopen(filename, "a");
     if (dl == NULL)
     {
-        printf("Error: File not found.\n");
+        printf("File not found.\n");
         return;
     }
 
@@ -566,7 +566,7 @@ void add_review_append_only(const char *filename)
 
     fclose(dl);
 
-    printf("Thank you! We have successfully received your review.\n");
+    printf("\nThank you! We have successfully received your review.\n");
 }
 
 //***************************** Delete Data *****************************
@@ -737,7 +737,7 @@ void delete_review(const char *filename)
     printf("Enter the Review ID to delete: ");
     if (scanf("%d", &delete_id) != 1)
     {
-        printf("Invalid Review_ID.\n");
+        printf("\nInvalid Review ID.\n");
         int ch;
         while ((ch = getchar()) != '\n' && ch != EOF)
         {
@@ -777,24 +777,24 @@ void delete_review(const char *filename)
             parse_csv_fields(rec, fields, 6);
 
             printf("\n--- Review Found ---\n");
-            printf("Review_ID: %s\nRating: %s\nMonth: %s\nLocation: %s\nReview: %s\nBranch: %s\n",
+            printf("ID: %s\nRating: %s\nMonth: %s\nLocation: %s\nReview: %s\nBranch: %s\n",
                    fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]);
 
-            if (ask_yes_no("Do you want to delete this review? (y/n): ") == 'n')
+            if (ask_yes_no("\nDo you want to delete this review? (y/n): ") == 'n')
             {
-                printf("This review has NOT been deleted.\n");
+                printf("\nThis review has NOT been deleted.\n");
                 fputs(rec, temp);
                 continue;
             }
 
-            if (ask_yes_no("Are you sure you want to delete this review? (y/n): ") == 'y')
+            if (ask_yes_no("\nAre you sure you want to delete this review? (y/n): ") == 'y')
             {
-                printf("Review deleted successfully.\n");
+                printf("\nReview deleted successfully.\n");
                 continue;
             }
             else
             {
-                printf("This review has NOT been deleted.\n");
+                printf("\nThis review has NOT been deleted.\n");
                 fputs(rec, temp);
                 continue;
             }
@@ -808,7 +808,7 @@ void delete_review(const char *filename)
     if (!found)
     {
         remove("temp_delete.csv");
-        printf("Review_ID not found.\n");
+        printf("\nReview ID not found.\n");
         return;
     }
 
@@ -893,7 +893,7 @@ int inputInt(const char *message)
         if (sscanf(line, "%d", &value) == 1)
             return value;
 
-        printf("Please enter numbers only.\n");
+        printf("\nPlease enter numbers only.\n");
     }
 }
 // function loadcsv
@@ -934,13 +934,13 @@ int inputRating(const char *message)
 
         if (sscanf(line, "%d", &value) != 1)
         {
-            printf("Please enter numbers only!\n");
+            printf("\nPlease enter numbers only!\n");
             continue;
         }
 
         if (value < 1 || value > 5)
         {
-            printf("Rating must be between 1 and 5!\n");
+            printf("\nRating must be between 1 and 5!\n");
             continue;
         }
 
@@ -1022,7 +1022,7 @@ void editMenu()
 
     if (index == -1)
     {
-        printf("Review ID not found\n");
+        printf("\nReview ID not found\n");
         return;
     }
 

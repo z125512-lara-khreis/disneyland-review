@@ -838,6 +838,45 @@ struct Review
 struct Review reviews[MAX]; // array collect all review
 int count = 0;              // collect the amount of review
 
+//comma in review
+void parseCSVLine(char *line, struct Review *r)
+{
+    char fields[6][REVIEW_LEN];
+    int field = 0, i = 0, j = 0;
+    int in_quotes = 0;
+
+    for (int k = 0; k < 6; k++)
+        fields[k][0] = '\0';
+
+    while (line[i] != '\0' && field < 6)
+    {
+        if (line[i] == '"')
+        {
+            in_quotes = !in_quotes;
+        }
+        else if (line[i] == ',' && !in_quotes)
+        {
+            fields[field][j] = '\0';
+            field++;
+            j = 0;
+        }
+        else
+        {
+            fields[field][j++] = line[i];
+        }
+        i++;
+    }
+    fields[field][j] = '\0';
+
+    /* copy to struct */
+    r->id = atoi(fields[0]);
+    r->rating = atoi(fields[1]);
+    strcpy(r->month, fields[2]);
+    strcpy(r->location, fields[3]);
+    strcpy(r->review, fields[4]);
+    strcpy(r->branch, fields[5]);
+}
+
 // function check int of id and rating
 int inputInt(const char *message)
 {
@@ -861,51 +900,25 @@ int inputInt(const char *message)
 void loadCSV()
 {
     FILE *fp = fopen("disneylandreview.csv", "r");
+    char line[REVIEW_LEN];
 
-    char line[LINE];
-    char buffer[REVIEW_LEN];
+    if (!fp)
+        return;
+
+    count = 0;
 
     /* skip header */
-    fgets(line, LINE, fp);
+    fgets(line, sizeof(line), fp);
 
-    /* read data */
-    while (fgets(line, LINE, fp) && count < MAX)
+    while (fgets(line, sizeof(line), fp) && count < MAX)
     {
-
-        buffer[0] = '\0';
-
-        /* if it still don't have " it have many line because it the review sentence */
-        if (strchr(line, '"'))
-        {
-            strcat(buffer, line);
-
-            /* read until find " again */
-            while (!strchr(buffer + 1, '"'))
-            {
-                if (!fgets(line, LINE, fp))
-                    break;
-                strcat(buffer, line);
-            }
-        }
-        else
-        {
-            strcpy(buffer, line);
-        }
-
-        sscanf(buffer,
-               "%d,%d,%19[^,],%49[^,],%3999[^,],%49[^\n]",
-               &reviews[count].id,
-               &reviews[count].rating,
-               reviews[count].month,
-               reviews[count].location,
-               reviews[count].review,
-               reviews[count].branch);
-
+        parseCSVLine(line, &reviews[count]);
         count++;
     }
 
     fclose(fp);
 }
+
 
 int inputRating(const char *message)
 {

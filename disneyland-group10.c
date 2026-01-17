@@ -242,6 +242,101 @@ void print_table()
     }
 }
 
+/* Function to help sort review entries */
+void swap_rows(int a, int b)
+{
+    char temp[MAX_CELL];
+
+    for (int c = 0; c < COLS; c++)
+    {
+        strcpy(temp, table[a][c]);
+        strcpy(table[a][c], table[b][c]);
+        strcpy(table[b][c], temp);
+    }
+}
+
+
+/* Sorts review entries by rating in a descending order*/
+void sort_by_rating_desc()
+{
+    for (int i = 0; i < rows - 1; i++)
+    {
+        for (int j = 0; j < rows - i - 1; j++)
+        {
+            int r1 = atoi(table[j][1]);
+            int r2 = atoi(table[j + 1][1]);
+
+            if (r1 < r2)
+            {
+                char temp[COLS][MAX_CELL];
+                memcpy(temp, table[j], sizeof(temp));
+                memcpy(table[j], table[j + 1], sizeof(temp));
+                memcpy(table[j + 1], temp, sizeof(temp));
+            }
+        }
+    }
+}
+
+/* Sorting review entries alphabetically by branch */
+void sort_by_branch(void)
+{
+    for (int i = 0; i < rows - 1; i++)
+    {
+        for (int j = i + 1; j < rows; j++)
+        {
+            if (strcmp(table[i][5], table[j][5]) > 0)
+            {
+                swap_rows(i, j);
+            }
+        }
+    }
+}
+
+/* Menu for sorting */
+int sort_menu()
+{
+    // Input is read as char
+    char input[10];
+
+    int choice;
+
+    printf("\nSort reviews by:\n\n");
+    printf("1 No sorting\n");
+    printf("2 Rating (high to low)\n");
+    printf("3 Branch (A-Z)\n\n");
+    printf("Choice: ");
+
+    if (!fgets(input, sizeof(input), stdin))
+    {
+        return 0;
+    }
+    
+
+    if (sscanf(input, "%d", &choice) != 1)
+    {
+        printf("Please enter a number!\n\n");
+        return 0;
+    }
+
+    if (choice < 1 || choice > 3)
+    {
+        printf("Please enter a number between 1 and 3!\n\n");
+        return 0;
+    }
+
+    if (choice == 2)
+    {
+        sort_by_rating_desc();
+    }
+    else if (choice == 3)
+    {
+        sort_by_branch();
+    }
+
+    return 1;
+}
+
+
 // function only 12 month
 void inputMonth(char *result, int maxLen)
 {
@@ -752,6 +847,11 @@ int main(void)
 
                 view_data(fp); // Call View function
                 fclose(fp);
+
+                while (!sort_menu())
+                {
+                    printf("Try again.\n");
+                }
 
                 column_width();
                 print_table();

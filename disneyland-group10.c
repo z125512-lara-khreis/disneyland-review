@@ -351,7 +351,7 @@ void inputMonth(char *result, int maxLen)
 
     while (1)
     {
-        printf("Enter Review Month (e.g. April): ");
+        printf("Enter the month you have visited (e.g. April): ");
 
         if (!fgets(input, sizeof(input), stdin))
             continue;
@@ -445,34 +445,32 @@ void add_review_append_only(const char *filename)
     char review_text[2000];
     char branch[200];
 
-    printf("Rating (1-5): ");
+    printf("Enter your rating (1-5): ");
     if (scanf("%d", &rating) != 1)
     {
-        printf("Error: Rating must be a number.\n");
+        printf("Rating must be a number!\n");
         return;
     }
     getchar();
 
     if (rating < 1 || rating > 5)
     {
-        printf("Error: Rating must be between 1 and 5.\n");
+        printf("Rating must be between 1 and 5!\n");
         return;
     }
 
-    printf("Review_Month (e.g. April): ");
     inputMonth(month, sizeof(month));
-    // getchar();
 
     for (i = 0; month[i] != '\0'; i++)
     {
         if (month[i] >= '0' && month[i] <= '9')
         {
-            printf("Error: Review_Month must not contain numbers.\n");
+            printf("Month must not contain numbers!\n");
             return;
         }
     }
 
-    printf("Reviewer_Location: ");
+    printf("Enter your location: ");
     scanf(" %199[^\n]", location);
     getchar();
 
@@ -480,16 +478,16 @@ void add_review_append_only(const char *filename)
     {
         if (location[i] >= '0' && location[i] <= '9')
         {
-            printf("Error: Reviewer_Location must not contain numbers.\n");
+            printf("Location must not contain numbers!\n");
             return;
         }
     }
 
-    printf("Review_Text: ");
+    printf("Enter your review: ");
     scanf(" %1999[^\n]", review_text);
     getchar();
 
-    printf("Branch (e.g. Disneyland_Paris): ");
+    printf("Enter the branch you have visited (e.g. Disneyland_Paris): ");
     scanf(" %199[^\n]", branch);
     getchar();
 
@@ -497,7 +495,7 @@ void add_review_append_only(const char *filename)
     {
         if (branch[i] >= '0' && branch[i] <= '9')
         {
-            printf("Error: Branch must not contain numbers.\n");
+            printf("Branch must not contain numbers!\n");
             return;
         }
     }
@@ -542,7 +540,7 @@ void delete_review(const char *filename)
 
     if (original == NULL || temp == NULL)
     {
-        printf("Error: File not found.\n");
+        printf("File not found.\n");
         return;
     }
 
@@ -686,13 +684,13 @@ int inputRating(const char *message)
 
         if (sscanf(line, "%d", &value) != 1)
         {
-            printf("Please enter numbers only.\n");
+            printf("Please enter numbers only!\n");
             continue;
         }
 
         if (value < 1 || value > 5)
         {
-            printf("Rating must be between 1 and 5.\n");
+            printf("Rating must be between 1 and 5!\n");
             continue;
         }
 
@@ -743,16 +741,16 @@ void editReview(int index)
     // use function inputint
     reviews[index].rating = inputRating("Enter the Rating (1-5): ");
 
-    printf("Enter the Month: ");
+    printf("Enter the month you have visited (e.g. April): ");
     inputMonth(reviews[index].month, sizeof(reviews[index].month));
 
-    printf("Enter the Location: ");
+    printf("Enter your location: ");
     scanf(" %49[^\n]", reviews[index].location);
 
-    printf("Enter the Review: ");
+    printf("Enter your review: ");
     scanf(" %3999[^\n]", reviews[index].review);
 
-    printf("Enter the Branch: ");
+    printf("Enter the brranch you have visited (e.g. Disneyland_Paris): ");
     scanf(" %49[^\n]", reviews[index].branch);
 
     // save file

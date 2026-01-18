@@ -893,7 +893,7 @@ int inputInt(const char *message)
         if (sscanf(line, "%d", &value) == 1)
             return value;
 
-        printf("\nPlease enter numbers only.\n");
+        printf("\nPlease enter numbers only!\n");
     }
 }
 // function loadcsv
@@ -1022,7 +1022,7 @@ void editMenu()
 
     if (index == -1)
     {
-        printf("\nReview ID not found\n");
+        printf("\nReview ID not found!\n");
         return;
     }
 

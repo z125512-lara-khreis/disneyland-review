@@ -495,10 +495,6 @@ void delete_review(const char *filename)
 
 //***************************** Edit Data *****************************
 
-
-
-//***************************** Edit Data *****************************
-
 #define MAX 100 // define max value of review
 #define LINE 1024
 #define REVIEW_LEN 4000

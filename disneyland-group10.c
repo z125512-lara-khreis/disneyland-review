@@ -912,6 +912,11 @@ void loadCSV()
 
     while (fgets(line, sizeof(line), fp) && count < MAX)
     {
+        // ********** เพิ่มบรรทัดนี้ลงไปครับ **********
+        // ลบ \n หรือ \r ที่อยู่ท้ายประโยคออก
+        line[strcspn(line, "\r\n")] = '\0'; 
+        // *****************************************
+
         parseCSVLine(line, &reviews[count]);
         count++;
     }
@@ -1017,13 +1022,21 @@ void editMenu()
 
     // Giving user to Enter review id
     //  use function inputint
-    int id = inputInt("Enter the Review ID: ");
-    int index = findByID(id);
+    int id; 
+    int index; 
 
-    if (index == -1)
+    while (1)
     {
-        printf("\nReview ID not found!\n");
-        return;
+        id = inputInt("Enter the Review ID: ");
+        index = findByID(id);
+
+        if (index == -1)
+        {
+            printf("\nReview ID not found! Please try again.\n");
+            continue;  
+        }
+
+        break;
     }
 
     /* show data to make sure!! */

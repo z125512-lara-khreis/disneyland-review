@@ -5,10 +5,10 @@
 //***************************** View Data *****************************
 
 /* Configuration */
-#define MAX_ROWS 100            // Maximum number of csv rows
-#define COLS 6                  // Fixed number of columns
-#define MAX_CELL 2048           // Maximum length of one cell
-#define MAX_REVIEW_WIDTH 52     // Maximum width of review text column
+#define MAX_ROWS 100        // Maximum number of csv rows
+#define COLS 6              // Fixed number of columns
+#define MAX_CELL 2048       // Maximum length of one cell
+#define MAX_REVIEW_WIDTH 52 // Maximum width of review text column
 
 char table[MAX_ROWS][COLS][MAX_CELL]; // Stores csv file in memory
 int rows = 0;
@@ -20,7 +20,6 @@ void column_width(void);
 void print_table(void);
 void print_separator(void);
 void print_cell_wrapped(const char *text, int width, int line);
-
 
 /* Word-wrapping for a single cell */
 void print_cell_wrapped(const char *text, int width, int line)
@@ -100,8 +99,7 @@ void column_width(void)
 {
     const char *header[COLS] = {
         "Review_ID", "Rating", "Review_Month",
-        "Reviewer_Location", "Review_Text", "Branch"
-    };
+        "Reviewer_Location", "Review_Text", "Branch"};
 
     for (int c = 0; c < COLS; c++)
     {
@@ -179,8 +177,7 @@ void print_table()
 {
     const char *header[COLS] = {
         "Review_ID", "Rating", "Review_Month",
-        "Reviewer_Location", "Review_Text", "Branch"
-    };
+        "Reviewer_Location", "Review_Text", "Branch"};
 
     print_separator();
 
@@ -239,6 +236,140 @@ void print_table()
             printf("\n");
         }
         print_separator();
+    }
+}
+
+/* Function to help sort review entries */
+void swap_rows(int a, int b)
+{
+    char temp[MAX_CELL];
+
+    for (int c = 0; c < COLS; c++)
+    {
+        strcpy(temp, table[a][c]);
+        strcpy(table[a][c], table[b][c]);
+        strcpy(table[b][c], temp);
+    }
+}
+
+/* Sorts review entries by rating in a descending order*/
+void sort_by_rating_desc()
+{
+    for (int i = 0; i < rows - 1; i++)
+    {
+        for (int j = 0; j < rows - i - 1; j++)
+        {
+            int r1 = atoi(table[j][1]);
+            int r2 = atoi(table[j + 1][1]);
+
+            if (r1 < r2)
+            {
+                char temp[COLS][MAX_CELL];
+                memcpy(temp, table[j], sizeof(temp));
+                memcpy(table[j], table[j + 1], sizeof(temp));
+                memcpy(table[j + 1], temp, sizeof(temp));
+            }
+        }
+    }
+}
+
+/* Sorting review entries alphabetically by branch */
+void sort_by_branch(void)
+{
+    for (int i = 0; i < rows - 1; i++)
+    {
+        for (int j = i + 1; j < rows; j++)
+        {
+            if (strcmp(table[i][5], table[j][5]) > 0)
+            {
+                swap_rows(i, j);
+            }
+        }
+    }
+}
+
+/* Menu for sorting */
+int sort_menu()
+{
+    // Input is read as char
+    char input[10];
+
+    int choice;
+
+    printf("\nSort reviews by:\n\n");
+    printf("1 No sorting\n");
+    printf("2 Rating (high to low)\n");
+    printf("3 Branch (A-Z)\n\n");
+    printf("Choice: ");
+
+    if (!fgets(input, sizeof(input), stdin))
+    {
+        return 0;
+    }
+
+    if (sscanf(input, "%d", &choice) != 1)
+    {
+        printf("Please enter a number!\n\n");
+        return 0;
+    }
+
+    if (choice < 1 || choice > 3)
+    {
+        printf("Please enter a number between 1 and 3!\n\n");
+        return 0;
+    }
+
+    if (choice == 2)
+    {
+        sort_by_rating_desc();
+    }
+    else if (choice == 3)
+    {
+        sort_by_branch();
+    }
+
+    return 1;
+}
+
+// function only 12 month
+void inputMonth(char *result, int maxLen)
+{
+    const char *months[] = {
+        "January", "February", "March", "April",
+        "May", "June", "July", "August",
+        "September", "October", "November", "December"};
+
+    char input[50];
+    int valid;
+
+    while (1)
+    {
+        printf("Enter the month you have visited (e.g. April): ");
+
+        if (!fgets(input, sizeof(input), stdin))
+            continue;
+
+        // delete newline
+        input[strcspn(input, "\n")] = '\0';
+
+        valid = 0;
+        for (int i = 0; i < 12; i++)
+        {
+            if (strcmp(input, months[i]) == 0)
+            {
+                valid = 1;
+                break;
+            }
+        }
+
+        if (valid)
+        {
+            strncpy(result, input, maxLen - 1);
+            result[maxLen - 1] = '\0';
+            return;
+        }
+
+        printf("Invalid month. Please enter a valid month name.\n");
     }
 }
 
@@ -302,66 +433,95 @@ void add_review_append_only(const char *filename)
 
     int rating;
     int i;
+    int ch;
     char month[100];
     char location[200];
     char review_text[2000];
     char branch[200];
 
-    printf("Rating (1-5): ");
-    if (scanf("%d", &rating) != 1)
+    while (1)
     {
-        printf("Error: Rating must be a number.\n");
-        return;
-    }
-    getchar();
+        printf("Enter your rating (1-5): ");
 
-    if (rating < 1 || rating > 5)
-    {
-        printf("Error: Rating must be between 1 and 5.\n");
-        return;
+        if (scanf("%d", &rating) != 1)
+        {
+            printf("Rating must be a number!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
+        }
+
+        while ((ch = getchar()) != '\n' && ch != EOF) { }
+
+        if (rating < 1 || rating > 5)
+        {
+            printf("Rating must be between 1 and 5!\n");
+            continue;
+        }
+
+        break;
     }
 
-    printf("Review_Month (e.g. April): ");
-    scanf(" %99[^\n]", month);
-    getchar();
+    inputMonth(month, sizeof(month));
 
     for (i = 0; month[i] != '\0'; i++)
     {
         if (month[i] >= '0' && month[i] <= '9')
         {
-            printf("Error: Review_Month must not contain numbers.\n");
+            printf("Month must not contain numbers!\n");
             return;
         }
     }
 
-    printf("Reviewer_Location: ");
-    scanf(" %199[^\n]", location);
-    getchar();
-
-    for (i = 0; location[i] != '\0'; i++)
+    while (1)
     {
-        if (location[i] >= '0' && location[i] <= '9')
+        printf("Enter your location: ");
+        if (scanf(" %199[^\n]", location) != 1)
         {
-            printf("Error: Reviewer_Location must not contain numbers.\n");
-            return;
+            printf("Location input is invalid!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
         }
+        getchar();
+
+        for (i = 0; location[i] != '\0'; i++)
+        {
+            if (location[i] >= '0' && location[i] <= '9')
+            {
+                printf("Location must not contain numbers!\n");
+                break;
+            }
+        }
+
+        if (location[i] == '\0')
+            break;
     }
 
-    printf("Review_Text: ");
+    printf("Enter your review: ");
     scanf(" %1999[^\n]", review_text);
     getchar();
 
-    printf("Branch (e.g. Disneyland_Paris): ");
-    scanf(" %199[^\n]", branch);
-    getchar();
-
-    for (i = 0; branch[i] != '\0'; i++)
+    while (1)
     {
-        if (branch[i] >= '0' && branch[i] <= '9')
+        printf("Enter the branch you have visited (e.g. Disneyland_Paris): ");
+        if (scanf(" %199[^\n]", branch) != 1)
         {
-            printf("Error: Branch must not contain numbers.\n");
-            return;
+            printf("Branch input is invalid!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
         }
+        getchar();
+
+        for (i = 0; branch[i] != '\0'; i++)
+        {
+            if (branch[i] >= '0' && branch[i] <= '9')
+            {
+                printf("Branch must not contain numbers!\n");
+                break;
+            }
+        }
+
+        if (branch[i] == '\0')
+            break;
     }
 
     printf("\n");
@@ -369,7 +529,7 @@ void add_review_append_only(const char *filename)
     FILE *dl = fopen(filename, "a");
     if (dl == NULL)
     {
-        printf("Error: File not found.\n");
+        printf("File not found.\n");
         return;
     }
 
@@ -378,16 +538,35 @@ void add_review_append_only(const char *filename)
         fprintf(dl, "Review_ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n");
     }
 
+    /* make sure the file ends with newline before appending */
+    FILE *check = fopen(filename, "r+");
+    if (check != NULL)
+    {
+        fseek(check, -1, SEEK_END);
+        int lastChar = fgetc(check);
+
+        if (lastChar != '\n')
+        {
+            fseek(check, 0, SEEK_END);
+            fputc('\n', check);
+        }
+        fclose(check);
+    }
+
     fprintf(dl, "%d,%d,", next_id, rating);
 
-    write_csv_field(dl, month);       fputc(',', dl);
-    write_csv_field(dl, location);    fputc(',', dl);
-    write_csv_field(dl, review_text); fputc(',', dl);
-    write_csv_field(dl, branch);      fputc('\n', dl);
+    write_csv_field(dl, month);
+    fputc(',', dl);
+    write_csv_field(dl, location);
+    fputc(',', dl);
+    write_csv_field(dl, review_text);
+    fputc(',', dl);
+    write_csv_field(dl, branch);
+    fputc('\n', dl);
 
     fclose(dl);
 
-    printf("Thank you! We have successfully received your review.\n");
+    printf("\nThank you! We have successfully received your review.\n");
 }
 
 //***************************** Delete Data *****************************
@@ -691,6 +870,45 @@ struct Review
 struct Review reviews[MAX]; // array collect all review
 int count = 0;              // collect the amount of review
 
+//comma in review
+void parseCSVLine(char *line, struct Review *r)
+{
+    char fields[6][REVIEW_LEN];
+    int field = 0, i = 0, j = 0;
+    int in_quotes = 0;
+
+    for (int k = 0; k < 6; k++)
+        fields[k][0] = '\0';
+
+    while (line[i] != '\0' && field < 6)
+    {
+        if (line[i] == '"')
+        {
+            in_quotes = !in_quotes;
+        }
+        else if (line[i] == ',' && !in_quotes)
+        {
+            fields[field][j] = '\0';
+            field++;
+            j = 0;
+        }
+        else
+        {
+            fields[field][j++] = line[i];
+        }
+        i++;
+    }
+    fields[field][j] = '\0';
+
+    /* copy to struct */
+    r->id = atoi(fields[0]);
+    r->rating = atoi(fields[1]);
+    strcpy(r->month, fields[2]);
+    strcpy(r->location, fields[3]);
+    strcpy(r->review, fields[4]);
+    strcpy(r->branch, fields[5]);
+}
+
 // function check int of id and rating
 int inputInt(const char *message)
 {
@@ -707,57 +925,64 @@ int inputInt(const char *message)
         if (sscanf(line, "%d", &value) == 1)
             return value;
 
-        printf("Please enter numbers only.\n");
+        printf("\nPlease enter numbers only!\n");
     }
 }
 // function loadcsv
 void loadCSV()
 {
     FILE *fp = fopen("disneylandreview.csv", "r");
+    char line[REVIEW_LEN];
 
-    char line[LINE];
-    char buffer[REVIEW_LEN];
+    if (!fp)
+        return;
+
+    count = 0;
 
     /* skip header */
-    fgets(line, LINE, fp);
+    fgets(line, sizeof(line), fp);
 
-    /* read data */
-    while (fgets(line, LINE, fp) && count < MAX)
+    while (fgets(line, sizeof(line), fp) && count < MAX)
     {
+        // ********** เพิ่มบรรทัดนี้ลงไปครับ **********
+        // ลบ \n หรือ \r ที่อยู่ท้ายประโยคออก
+        line[strcspn(line, "\r\n")] = '\0'; 
+        // *****************************************
 
-        buffer[0] = '\0';
-
-        /* if it still don't have " it have many line because it the review sentence */
-        if (strchr(line, '"'))
-        {
-            strcat(buffer, line);
-
-            /* read until find " again */
-            while (!strchr(buffer + 1, '"'))
-            {
-                if (!fgets(line, LINE, fp))
-                    break;
-                strcat(buffer, line);
-            }
-        }
-        else
-        {
-            strcpy(buffer, line);
-        }
-
-        sscanf(buffer,
-               "%d,%d,%19[^,],%49[^,],\"%3999[^\"]\",%49[^\n]",
-               &reviews[count].id,
-               &reviews[count].rating,
-               reviews[count].month,
-               reviews[count].location,
-               reviews[count].review,
-               reviews[count].branch);
-
+        parseCSVLine(line, &reviews[count]);
         count++;
     }
 
     fclose(fp);
+}
+
+
+int inputRating(const char *message)
+{
+    char line[100];
+    int value;
+
+    while (1)
+    {
+        printf("%s", message);
+
+        if (!fgets(line, sizeof(line), stdin))
+            continue;
+
+        if (sscanf(line, "%d", &value) != 1)
+        {
+            printf("\nPlease enter numbers only!\n");
+            continue;
+        }
+
+        if (value < 1 || value > 5)
+        {
+            printf("\nRating must be between 1 and 5!\n");
+            continue;
+        }
+
+        return value;
+    }
 }
 
 // save function
@@ -801,18 +1026,18 @@ void editReview(int index)
     printf("\n--- Edit Review ---\n");
 
     // use function inputint
-    reviews[index].rating = inputInt("Enter the Rating: ");
+    reviews[index].rating = inputRating("Enter the Rating (1-5): ");
 
-    printf("Enter the Month: ");
-    scanf(" %19[^\n]", reviews[index].month);
+    // printf("Enter the month you have visited (e.g. April): ");
+    inputMonth(reviews[index].month, sizeof(reviews[index].month));
 
-    printf("Enter the Location: ");
+    printf("Enter your location: ");
     scanf(" %49[^\n]", reviews[index].location);
 
-    printf("Enter the Review: ");
+    printf("Enter your review: ");
     scanf(" %3999[^\n]", reviews[index].review);
 
-    printf("Enter the Branch: ");
+    printf("Enter the brranch you have visited (e.g. Disneyland_Paris): ");
     scanf(" %49[^\n]", reviews[index].branch);
 
     // save file
@@ -824,17 +1049,26 @@ void editReview(int index)
 // funtion show all process
 void editMenu()
 {
+    count = 0;
     loadCSV(); // use function loadcsv
 
     // Giving user to Enter review id
     //  use function inputint
-    int id = inputInt("Enter Review ID: ");
-    int index = findByID(id);
+    int id; 
+    int index; 
 
-    if (index == -1)
+    while (1)
     {
-        printf("Review ID not found\n");
-        return;
+        id = inputInt("Enter the Review ID: ");
+        index = findByID(id);
+
+        if (index == -1)
+        {
+            printf("\nReview ID not found! Please try again.\n");
+            continue;  
+        }
+
+        break;
     }
 
     /* show data to make sure!! */
@@ -849,9 +1083,10 @@ void editMenu()
     printf("\nDo you want to edit this review? (y/n): ");
     scanf(" %c", &confirm);
 
-    //clear buffer
+    // clear buffer
     int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
 
     if (confirm == 'y' || confirm == 'Y')
     {
@@ -892,26 +1127,32 @@ int main(void)
 
         // clear buffer
         int c;
-        while ((c = getchar()) != '\n' && c != EOF);
+        while ((c = getchar()) != '\n' && c != EOF)
+            ;
 
         switch (choice)
         {
         case 1:
+        {
+            FILE *fp = fopen("disneylandreview.csv", "r");
+            if (!fp)
             {
-                FILE *fp = fopen("disneylandreview.csv", "r");
-                if (!fp)
-                {
-                    perror("File could not be opened");
-                    return 1;
-                }
-
-                view_data(fp); // Call View function
-                fclose(fp);
-
-                column_width();
-                print_table();
-                break;
+                perror("File could not be opened");
+                return 1;
             }
+
+            view_data(fp); // Call View function
+            fclose(fp);
+
+            while (!sort_menu())
+            {
+                printf("Try again.\n");
+            }
+
+            column_width();
+            print_table();
+            break;
+        }
         case 2:
             add_review_append_only("disneylandreview.csv"); // Call Add function
             break;

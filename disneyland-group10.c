@@ -392,105 +392,281 @@ void add_review_append_only(const char *filename)
 
 //***************************** Delete Data *****************************
 
+/* Trim newline characters from the end of the input string */
+static void trim_newline(char *s)
+{
+    if (!s)
+        return;
+    size_t n = strlen(s);
+    while (n > 0 && (s[n - 1] == '\n' || s[n - 1] == '\r'))
+    {
+        s[n - 1] = '\0';
+        n--;
+    }
+}
+
+/* Ask the user a yes/no question until valid input is given */
+static char ask_yes_no(const char *prompt)
+{
+    char ans[32];
+    while (1)
+    {
+        printf("%s", prompt);
+        if (!fgets(ans, sizeof(ans), stdin))
+            return 'n';
+        trim_newline(ans);
+
+        if (ans[0] == 'y' || ans[0] == 'Y')
+            return 'y';
+        if (ans[0] == 'n' || ans[0] == 'N')
+            return 'n';
+
+        printf("Please enter y or n.\n");
+    }
+}
+
+/* Read ONE complete CSV record */
+static int read_csv_record(FILE *fp, char *out, size_t out_size)
+{
+    if (!fp || !out || out_size == 0)
+        return 0;
+
+    out[0] = '\0';
+    char line[2048];
+    int in_quotes = 0;
+    size_t used = 0;
+
+    while (fgets(line, sizeof(line), fp))
+    {
+        size_t len = strlen(line);
+        if (used + len + 1 >= out_size)
+            return 0;
+
+        memcpy(out + used, line, len + 1);
+        used += len;
+
+        /*Check whether we are inside quoted fields */
+        for (size_t i = 0; i < len; i++)
+        {
+            if (line[i] == '"')
+            {
+                if (line[i + 1] == '"')
+                    i++; 
+                else
+                    in_quotes = !in_quotes;
+            }
+        }
+
+        if (!in_quotes)
+            return 1;
+    }
+    return used > 0;
+}
+
+/* Parse CSV fields correctly */
+static int parse_csv_fields(const char *rec, char fields[][2000], int max_fields)
+{
+    int f = 0, i = 0;
+
+    while (rec[i] != '\0' && f < max_fields)
+    {
+        int out = 0;
+        while (rec[i] == ' ')
+            i++;
+
+        /* Field is enclosed in double quotes */
+        if (rec[i] == '"')
+        {
+            i++;
+            while (rec[i] != '\0')
+            {
+                if (rec[i] == '"' && rec[i + 1] == '"')
+                {
+                    fields[f][out++] = '"';
+                    i += 2;
+                }
+                else if (rec[i] == '"')
+                {
+                    i++;
+                    break;
+                }
+                else
+                {
+                    fields[f][out++] = rec[i++];
+                }
+            }
+            fields[f][out] = '\0';
+            while (rec[i] && rec[i] != ',')
+                i++;
+            if (rec[i] == ',')
+                i++;
+        }
+        else
+        {
+            /* Normal field without quotes */
+            while (rec[i] && rec[i] != ',' && rec[i] != '\n')
+                fields[f][out++] = rec[i++];
+            fields[f][out] = '\0';
+            if (rec[i] == ',')
+                i++;
+        }
+        f++;
+    }
+    return f;
+}
+
+/* Delete a review by Review ID */
 void delete_review(const char *filename)
 {
-    while (1)   
+    FILE *fp = fopen(filename, "r");
+    if (!fp)
     {
-        FILE *fp = fopen(filename, "r");
-        if (!fp)
+        printf("File not found %s\n", filename);
+        return;
+    }
+
+    /*Read CSV header*/
+    char header[2048];
+    if (!fgets(header, sizeof(header), fp))
+    {
+        printf("Error: CSV header missing.\n");
+        fclose(fp);
+        return;
+    }
+
+    /*Read all records into memory for easier deletion*/
+    int cap = 128;
+    int nrec = 0;
+    char **records = (char **)malloc(sizeof(char *) * cap);
+    if (!records)
+    {
+        fclose(fp);
+        return;
+    }
+
+    char rec[8000];
+    while (read_csv_record(fp, rec, sizeof(rec)))
+    {
+        if (nrec >= cap)
         {
-            printf("File not found: %s\n", filename);
-            return;
+            cap *= 2;
+            char **tmp = (char **)realloc(records, sizeof(char *) * cap);
+            if (!tmp)
+                break;
+            records = tmp;
         }
 
-        int delete_id;
+        records[nrec] = (char *)malloc(strlen(rec) + 1);
+        if (!records[nrec])
+            break;
+        strcpy(records[nrec], rec);
+        nrec++;
+    }
+    fclose(fp);
+
+    /* Keep asking until user enters a valid and existing Review ID */
+    int delete_id = 0;
+    int target_index = -1;
+    char line[128];
+
+    while (1)
+    {
         printf("Enter the Review ID to delete: ");
+        if (!fgets(line, sizeof(line), stdin))
+            continue;
+        trim_newline(line);
 
-        if (scanf("%d", &delete_id) != 1)
+        /* Input must be a number only */
+        int value;
+        char extra;
+        if (sscanf(line, "%d %c", &value, &extra) != 1)
         {
-            printf("Invalid Review ID.\n");
-
-            int ch;
-            while ((ch = getchar()) != '\n' && ch != EOF) {}
-            fclose(fp);
-            continue;   
+            printf("\nInvalid Review ID. Please enter numbers only.\n\n");
+            continue;
         }
-        getchar(); 
 
-       
-        char records[1000][8000];
-        int count = 0;
+        delete_id = value;
+        target_index = -1;
 
-        if (!read_csv_record(fp, records[count], sizeof(records[count])))
-        {
-            printf("CSV header missing.\n");
-            fclose(fp);
-            return;
-        }
-        count++;
-
-        int found = 0;
-        int delete_index = -1;
-
-        while (read_csv_record(fp, records[count], sizeof(records[count])))
+        /* Search for the matching Review ID */
+        for (int i = 0; i < nrec; i++)
         {
             int id;
-            if (sscanf(records[count], "%d,", &id) == 1 && id == delete_id)
+            if (sscanf(records[i], "%d,", &id) == 1 && id == delete_id)
             {
-                found = 1;
-                delete_index = count;
+                target_index = i;
+                break;
             }
-            count++;
         }
-        fclose(fp);
 
-        if (!found)
+        if (target_index == -1)
         {
-            printf("Review ID not found.\n");
-            continue; 
+            printf("\nReview ID not found. Please try again.\n\n");
+            continue;
         }
 
+        break;
+    }
+
+    /* Display the selected review */
+    {
         char fields[6][2000];
-        parse_csv_fields(records[delete_index], fields, 6);
+        parse_csv_fields(records[target_index], fields, 6);
 
         printf("\n--- Review Found ---\n");
-        printf("ID: %s\n", fields[0]);
-        printf("Rating: %s\n", fields[1]);
-        printf("Month: %s\n", fields[2]);
-        printf("Location: %s\n", fields[3]);
-        printf("Review: %s\n", fields[4]);
-        printf("Branch: %s\n", fields[5]);
-
-        if (ask_yes_no("\nDo you want to delete this review? (y/n): ") == 'n')
-        {
-            printf("This review has NOT been deleted.\n");
-            return;  
-        }
-
-        if (ask_yes_no("Are you sure you want to delete this review? (y/n): ") == 'n')
-        {
-            printf("This review has NOT been deleted.\n");
-            return; 
-        }
-
-        fp = fopen(filename, "w");
-        if (!fp)
-        {
-            printf("Failed to write CSV file.\n");
-            return;
-        }
-
-        for (int i = 0; i < count; i++)
-        {
-            if (i == delete_index) continue;
-            fputs(records[i], fp);
-        }
-
-        fclose(fp);
-
-        printf("Review deleted successfully.\n");
-        return;  
+        printf("ID: %s\nRating: %s\nMonth: %s\nLocation: %s\nReview: %s\nBranch: %s\n",
+               fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]);
     }
+
+    /* Double confirmation to prevent accidental deletion */
+    if (ask_yes_no("\nDo you want to delete this review? (y/n): ") == 'n')
+    {
+        printf("\nThis review has NOT been deleted.\n");
+        for (int i = 0; i < nrec; i++)
+            free(records[i]);
+        free(records);
+        return;
+    }
+
+    if (ask_yes_no("\nAre you sure you want to delete this review? (y/n): ") == 'n')
+    {
+        printf("\nThis review has NOT been deleted.\n");
+        for (int i = 0; i < nrec; i++)
+            free(records[i]);
+        free(records);
+        return;
+    }
+
+    /* Rewrite the original CSV file */
+    fp = fopen(filename, "w");
+    if (!fp)
+    {
+        printf("\nError: cannot write file.\n");
+        for (int i = 0; i < nrec; i++)
+            free(records[i]);
+        free(records);
+        return;
+    }
+
+    fputs(header, fp);
+    if (header[strlen(header) - 1] != '\n')
+        fputc('\n', fp);
+
+    for (int i = 0; i < nrec; i++)
+    {
+        if (i == target_index)
+            continue;
+        fputs(records[i], fp);
+        if (records[i][strlen(records[i]) - 1] != '\n')
+            fputc('\n', fp);
+    }
+    fclose(fp);
+
+    printf("\nReview deleted successfully.\n");
+
+    for (int i = 0; i < nrec; i++)
+        free(records[i]);
+    free(records);
 }
 
 //***************************** Edit Data *****************************

@@ -6,8 +6,8 @@
 #define MAX_ROWS 100        // Maximum number of csv rows
 #define COLS 6              // Fixed number of columns
 #define MAX_CELL 2048       // Maximum length of one cell
-#define MAX_REVIEW_WIDTH 52 // Maximum width of review text column
-#define MAX 100 // define max value of review
+#define MAX_REVIEW_WIDTH 70 // Maximum width of review text column
+#define MAX 100             // define max value of review
 #define LINE 1024
 #define REVIEW_LEN 4000
 
@@ -25,6 +25,41 @@ void print_table(void);
 void print_separator(void);
 void print_cell_wrapped(const char *text, int width, int line);
 
+/* Wrapped lines are counted so the whole review is printed */
+int count_wrapped_lines(const char *text, int width)
+{
+    int len = strlen(text);
+    int pos = 0;
+    int lines = 0;
+
+    while (pos < len)
+    {
+        int end = pos + width;
+        if (end >= len)
+        {
+            lines++;
+            break;
+        }
+
+        int cut = end;
+        while (cut > pos && text[cut] != ' ')
+        {
+            cut--;
+        }
+
+        if (cut == pos)
+        {
+            pos = end;
+        }
+        else
+        {
+            pos = cut + 1;
+        }
+        lines++;
+    }
+    return lines;
+}
+
 /* Word-wrapping for a single cell */
 void print_cell_wrapped(const char *text, int width, int line)
 {
@@ -34,13 +69,14 @@ void print_cell_wrapped(const char *text, int width, int line)
     // Find the starting position for the requested line
     for (int l = 0; l < line && pos < len; l++)
     {
-        int next = pos + width;
-        if (next > len)
+        int end = pos + width;
+        if (end >= len)
         {
-            next = len;
+            pos = len;
+            break;
         }
 
-        int cut = next;
+        int cut = end;
         while (cut > pos && text[cut] != ' ')
         {
             cut--;
@@ -49,9 +85,12 @@ void print_cell_wrapped(const char *text, int width, int line)
         // Force cut when no space is found
         if (cut == pos)
         {
-            cut = next;
+            pos = end;
         }
-        pos = cut + 1;
+        else
+        {
+            pos = cut +1;
+        }
     }
 
     // Print empty cell when no more text is left
@@ -63,9 +102,10 @@ void print_cell_wrapped(const char *text, int width, int line)
 
     // Determine end of the current wrapped line
     int end = pos + width;
-    if (end > len)
+    if (end >= len)
     {
-        end = len;
+        printf("%-*s", width, text + pos);
+        return;
     }
 
     int cut = end;
@@ -202,7 +242,7 @@ void print_table()
         for (int c = 2; c < COLS; c++)
         {
             int w = col_width[c];
-            int lines = (strlen(table[r][c]) + w - 1) / w;
+            int lines = count_wrapped_lines(table[r][c], w);
             if (lines > max_lines)
             {
                 max_lines = lines;

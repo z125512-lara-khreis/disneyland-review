@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-//***************************** View Data *****************************
-
 /* Configuration */
 #define MAX_ROWS 100        // Maximum number of csv rows
 #define COLS 6              // Fixed number of columns
@@ -12,6 +10,9 @@
 #define MAX 100 // define max value of review
 #define LINE 1024
 #define REVIEW_LEN 4000
+
+
+//***************************** View Data *****************************
 
 char table[MAX_ROWS][COLS][MAX_CELL]; // Stores csv file in memory
 int rows = 0;
@@ -242,6 +243,8 @@ void print_table()
     }
 }
 
+//***************************** Sort Data *****************************
+
 /* Function to help sort review entries */
 void swap_rows(int a, int b)
 {
@@ -334,7 +337,7 @@ int sort_menu()
     return 1;
 }
 
-// function only 12 month
+// Function to check that only the names of the 12 months are entered by the user
 void inputMonth(char *result, int maxLen)
 {
     const char *months[] = {
@@ -854,7 +857,7 @@ void delete_review(const char *filename)
 //***************************** Edit Data *****************************
 
 /* =========================
-Struct for collect Review
+Struct for collecting review
 ========================= */
 struct Review
 {
@@ -927,6 +930,7 @@ int inputInt(const char *message)
         printf("\nPlease enter numbers only!\n");
     }
 }
+
 // function loadcsv
 void loadCSV()
 {
@@ -954,7 +958,6 @@ void loadCSV()
 
     fclose(fp);
 }
-
 
 int inputRating(const char *message)
 {
@@ -1045,7 +1048,7 @@ void editReview(int index)
     printf("\nReview updated successfully!\n");
 }
 
-// funtion show all process
+// Funtion to show the whole process
 void editMenu()
 {
     count = 0;

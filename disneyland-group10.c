@@ -604,43 +604,11 @@ static char ask_yes_no(const char *prompt)
     }
 }
 
-/* Read ONE complete CSV record */
-static int read_csv_record(FILE *fp, char *out, size_t out_size)
-{
-    if (!fp || !out || out_size == 0)
-        return 0;
-
-    out[0] = '\0';
-    char line[2048];
-    int in_quotes = 0;
-    size_t used = 0;
-
-    while (fgets(line, sizeof(line), fp))
-    {
-        size_t len = strlen(line);
-        if (used + len + 1 >= out_size)
-            return 0;
-
-        memcpy(out + used, line, len + 1);
-        used += len;
-
-        /*Check whether we are inside quoted fields */
-        for (size_t i = 0; i < len; i++)
-        {
-            if (line[i] == '"')
-            {
-                if (line[i + 1] == '"')
-                    i++; 
-                else
-                    in_quotes = !in_quotes;
-            }
-        }
-
-        if (!in_quotes)
-            return 1;
-    }
-    return used > 0;
-}
+/* NOTE:
+ * We intentionally read the CSV file line-by-line (fgets) for deletion.
+ * This keeps the delete part simple and avoids an extra "read_csv_record" helper.
+ * Assumption: each review is stored in a single CSV line (no embedded newlines).
+ */
 
 /* Parse CSV fields correctly */
 static int parse_csv_fields(const char *rec, char fields[][2000], int max_fields)
@@ -724,8 +692,15 @@ void delete_review(const char *filename)
     }
 
     char rec[8000];
-    while (read_csv_record(fp, rec, sizeof(rec)))
+    while (fgets(rec, sizeof(rec), fp))
     {
+        /* remove trailing newline so later rewriting can control \n consistently */
+        trim_newline(rec);
+
+        /* skip empty lines */
+        if (rec[0] == '\0')
+            continue;
+
         if (nrec >= cap)
         {
             cap *= 2;

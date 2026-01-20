@@ -9,6 +9,9 @@
 #define COLS 6              // Fixed number of columns
 #define MAX_CELL 2048       // Maximum length of one cell
 #define MAX_REVIEW_WIDTH 52 // Maximum width of review text column
+#define MAX 100 // define max value of review
+#define LINE 1024
+#define REVIEW_LEN 4000
 
 char table[MAX_ROWS][COLS][MAX_CELL]; // Stores csv file in memory
 int rows = 0;
@@ -849,10 +852,6 @@ void delete_review(const char *filename)
 }
 
 //***************************** Edit Data *****************************
-
-#define MAX 100 // define max value of review
-#define LINE 1024
-#define REVIEW_LEN 4000
 
 /* =========================
 Struct for collect Review

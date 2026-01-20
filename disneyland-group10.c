@@ -918,10 +918,8 @@ void loadCSV()
 
     while (fgets(line, sizeof(line), fp) && count < MAX)
     {
-        // ********** เพิ่มบรรทัดนี้ลงไปครับ **********
-        // ลบ \n หรือ \r ที่อยู่ท้ายประโยคออก
         line[strcspn(line, "\r\n")] = '\0'; 
-        // *****************************************
+
 
         parseCSVLine(line, &reviews[count]);
         count++;
@@ -958,6 +956,69 @@ int inputRating(const char *message)
         return value;
     }
 }
+
+void inputBranch(char branch[], int size)
+{
+    int i;
+    char ch;
+
+    while (1)
+    {
+        printf("Enter the branch you have visited (e.g. Disneyland_Paris): ");
+
+        if (scanf(" %49[^\n]", branch) != 1)
+        {
+            printf("Branch input is invalid!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
+        }
+        getchar(); // clear newline
+
+        for (i = 0; branch[i] != '\0'; i++)
+        {
+            if (branch[i] >= '0' && branch[i] <= '9')
+            {
+                printf("Branch must not contain numbers!\n");
+                break;
+            }
+        }
+
+        if (branch[i] == '\0')
+            break;   
+    }
+}
+
+void inputLocation(char location[], int size)
+{
+    int i;
+    char ch;
+
+    while (1)
+    {
+        printf("Enter your location: ");
+
+        if (scanf(" %49[^\n]", location) != 1)
+        {
+            printf("Location input is invalid!\n");
+            while ((ch = getchar()) != '\n' && ch != EOF) { }
+            continue;
+        }
+        getchar(); // clear newline
+
+        for (i = 0; location[i] != '\0'; i++)
+        {
+            if (location[i] >= '0' && location[i] <= '9')
+            {
+                printf("Location must not contain numbers!\n");
+                break;
+            }
+        }
+
+        if (location[i] == '\0')
+            break;  
+    }
+}
+
 
 // save function
 void saveCSV()
@@ -1005,14 +1066,13 @@ void editReview(int index)
     // printf("Enter the month you have visited (e.g. April): ");
     inputMonth(reviews[index].month, sizeof(reviews[index].month));
 
-    printf("Enter your location: ");
-    scanf(" %49[^\n]", reviews[index].location);
+    inputLocation(reviews[index].location, sizeof(reviews[index].location));
 
     printf("Enter your review: ");
     scanf(" %3999[^\n]", reviews[index].review);
 
-    printf("Enter the brranch you have visited (e.g. Disneyland_Paris): ");
-    scanf(" %49[^\n]", reviews[index].branch);
+    inputBranch(reviews[index].branch, sizeof(reviews[index].branch));
+
 
     // save file
     saveCSV();

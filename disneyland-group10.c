@@ -425,24 +425,24 @@ void inputMonth(char *result, int maxLen)
 void write_csv_field(FILE *dl, char text[])
 {
     int i = 0;
-    fprintf(dl, "\"");
+    fprintf(dl, "\""); /* CSV escaping: always wrap fields in quotes */
 
     while (text[i] != '\0')
     {
         if (text[i] == '"')
-            fprintf(dl, "\"");
+            fprintf(dl, "\""); /* escape quotes inside the field by doubling them */
 
-        fprintf(dl, "%c", text[i]);
+        fprintf(dl, "%c", text[i]); /* write the current character */
         i++;
     }
 
-    fprintf(dl, "\"");
+    fprintf(dl, "\""); /* closing quote for the field */
 }
 
 /*Checks if the file exists. It tries to open the file in read mode. It returns 1 if it works, otherwise 0.*/
 int file_exists(const char *filename)
 {
-    FILE *dl = fopen(filename, "r");
+    FILE *dl = fopen(filename, "r"); /* opening in read mode is a simple existence/access check */
     if (dl == NULL)
         return 0;
 
@@ -459,12 +459,13 @@ int get_next_id(const char *filename)
     int last_id = 0;
 
     if (dl == NULL)
-        return 1;
+        return 1; /* file doesn't exist yet -> first ID should be 1 */
 
     while (fgets(line, 2000, dl) != NULL)
     {
+        /* expect first column to be an integer ID followed by a comma */
         if (sscanf(line, "%d,", &id) == 1)
-            last_id = id;
+            last_id = id; /* keeps updating; assumes IDs are in ascending order */
     }
 
     fclose(dl);
@@ -492,11 +493,12 @@ void add_review_append_only(const char *filename)
         if (scanf("%d", &rating) != 1)
         {
             printf("Rating must be a number!\n");
+            /* clear invalid input from stdin so the loop can retry cleanly */
             while ((ch = getchar()) != '\n' && ch != EOF) { }
             continue;
         }
 
-        while ((ch = getchar()) != '\n' && ch != EOF) { }
+        while ((ch = getchar()) != '\n' && ch != EOF) { } /* consume leftover newline */
 
         if (rating < 1 || rating > 5)
         {
@@ -507,14 +509,14 @@ void add_review_append_only(const char *filename)
         break;
     }
 
-    inputMonth(month, sizeof(month));
+    inputMonth(month, sizeof(month)); /* external helper: reads month text into buffer safely */
 
     for (i = 0; month[i] != '\0'; i++)
     {
         if (month[i] >= '0' && month[i] <= '9')
         {
             printf("Month must not contain numbers!\n");
-            return;
+            return; /* early exit on invalid month */
         }
     }
 
@@ -527,7 +529,7 @@ void add_review_append_only(const char *filename)
             while ((ch = getchar()) != '\n' && ch != EOF) { }
             continue;
         }
-        getchar();
+        getchar(); /* consume newline after the scanset read */
 
         for (i = 0; location[i] != '\0'; i++)
         {
@@ -539,11 +541,11 @@ void add_review_append_only(const char *filename)
         }
 
         if (location[i] == '\0')
-            break;
+            break; /* only accept location if no digits were found */
     }
 
     printf("Enter your review: ");
-    scanf(" %1999[^\n]", review_text);
+    scanf(" %1999[^\n]", review_text); /* read full line (up to buffer limit) */
     getchar();
 
     while (1)
@@ -572,7 +574,7 @@ void add_review_append_only(const char *filename)
 
     printf("\n");
 
-    FILE *dl = fopen(filename, "a");
+    FILE *dl = fopen(filename, "a"); /* append-only write: preserve existing records */
     if (dl == NULL)
     {
         printf("File not found.\n");
@@ -581,11 +583,11 @@ void add_review_append_only(const char *filename)
 
     if (!existed)
     {
-        fprintf(dl, "Review_ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n");
+        fprintf(dl, "Review_ID,Rating,Review_Month,Reviewer_Location,Review_Text,Branch\n"); /* write header once */
     }
 
     /* make sure the file ends with newline before appending */
-    FILE *check = fopen(filename, "r+");
+    FILE *check = fopen(filename, "r+"); /* open for read/write so we can inspect/patch the last byte */
     if (check != NULL)
     {
         fseek(check, -1, SEEK_END);
@@ -594,13 +596,14 @@ void add_review_append_only(const char *filename)
         if (lastChar != '\n')
         {
             fseek(check, 0, SEEK_END);
-            fputc('\n', check);
+            fputc('\n', check); /* ensures the next appended row starts on a new line */
         }
         fclose(check);
     }
 
-    fprintf(dl, "%d,%d,", next_id, rating);
+    fprintf(dl, "%d,%d,", next_id, rating); /* write ID and rating as raw CSV numbers */
 
+    /* remaining fields are quoted/escaped to safely handle commas/newlines/quotes */
     write_csv_field(dl, month);
     fputc(',', dl);
     write_csv_field(dl, location);
